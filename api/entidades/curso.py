@@ -2,7 +2,7 @@ class Curso:
     
     def __init__(self, nome, descricao, data_publicacao):
         self.__nome = nome
-        self.__descricacao = descricao
+        self.__descricao = descricao
         self.__data_publicacao = data_publicacao
         
     @property
