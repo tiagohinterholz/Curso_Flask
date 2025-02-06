@@ -3,14 +3,15 @@ from api import api
 from ..schemas import curso_schema
 from flask import request, make_response, jsonify
 from ..entidades import curso
-from ..services import curso_service
+from ..services import curso_service, formacao_service
+from ..paginate import paginate
+from ..models.curso_model import Curso
 
 class CursoList(Resource):
     
     def get(self):
-        cursos = curso_service.listar_cursos()
         cs = curso_schema.CursoSchema(many=True)
-        return make_response(cs.jsonify(cursos), 200)
+        return paginate(Curso, cs)
 
     def post(self):
         cs = curso_schema.CursoSchema()
@@ -21,8 +22,12 @@ class CursoList(Resource):
         nome = request.json['nome']
         descricao = request.json['descricao']
         data_publicacao = request.json['data_publicacao']
-        
-        novo_curso = curso.Curso(nome=nome, descricao=descricao, data_publicacao=data_publicacao)
+        formacao = request.json['formacao']
+        formacao_curso = formacao_service.listas_formacao_id(formacao)
+        if formacao_curso is None:
+            return make_response(jsonify("Informação nao encontrada"), 404)
+        novo_curso = curso.Curso(nome=nome, descricao=descricao, data_publicacao=data_publicacao,
+                                 formacao=formacao_curso)
         resultado = curso_service.cadastrar_curso(novo_curso)
                 
         return make_response(cs.jsonify(resultado), 201)
@@ -50,7 +55,12 @@ class CursoDetail(Resource):
         nome = request.json['nome']
         descricao = request.json['descricao']
         data_publicacao = request.json['data_publicacao']
-        novo_curso = curso.Curso(nome=nome, descricao=descricao, data_publicacao=data_publicacao)
+        formacao = request.json['formacao']
+        formacao_curso = formacao_service.listas_formacao_id(formacao)
+        if formacao_curso is None:
+            return make_response(jsonify("Informação nao encontrada"), 404)
+        novo_curso = curso.Curso(nome=nome, descricao=descricao, data_publicacao=data_publicacao,
+                                 formacao=formacao_curso)
         curso_service.atualiza_curso(curso_db, novo_curso)
         curso_atualizado = curso_service.listas_curso_id(id)
         return make_response(cs.jsonify(curso_atualizado), 200)   
