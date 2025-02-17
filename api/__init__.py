@@ -1,9 +1,12 @@
-from flask import Flask
+from flask import Flask, jsonify ,request
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, verify_jwt_in_request
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError, DecodeError
+from werkzeug.exceptions import HTTPException
+
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -14,5 +17,6 @@ migrate = Migrate(app, db)
 api = Api(app)
 jwt = JWTManager(app)
 
-from .views import curso_views, formacao_views, professor_views, usuario_views, login_views
+
+from .views import curso_views, formacao_views, professor_views, usuario_views, login_views, refresh_token_views
 from .models import curso_model, formacao_model, professor_model, usuario_model
